@@ -11,9 +11,6 @@ router.get('/', function (req, res) {
 
     res.render('index', { expressVersion: expressVersion, Version: process.version });
 });
-router.get('/email', function (req, res) {
-    res.render('email/ResetPassword', { url: "#" });
-});
 
 var apiRouter = express.Router();
 
