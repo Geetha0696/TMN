@@ -1,0 +1,35 @@
+{
+  "development": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "tms",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "dialect": "postgres",
+    "migrationStorageTableName": "Migrations",
+    "timezone": "+05:30",
+    "logging": false
+  },
+  "test": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "tms",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "dialect": "postgres",
+    "migrationStorageTableName": "Migrations",
+    "timezone": "+05:30",
+    "logging": false
+  },
+  "production": {
+    "username": "postgres",
+    "password": "postgres",
+    "database": "tms",
+    "host": "127.0.0.1",
+    "port": "5432",
+    "dialect": "postgres",
+    "migrationStorageTableName": "Migrations",
+    "timezone": "+05:30",
+    "logging": false
+  }
+}
