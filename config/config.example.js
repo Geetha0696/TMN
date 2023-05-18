@@ -12,5 +12,7 @@ module.exports = {
     mail_port: 587,
     mail_username: "",
     mail_password: "",
-    mail_from_address: ""
+    mail_from_address: "",
+
+    frontend_url: "http://localhost:3000/",
 };

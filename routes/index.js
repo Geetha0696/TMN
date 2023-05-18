@@ -11,11 +11,16 @@ router.get('/', function (req, res) {
 
     res.render('index', { expressVersion: expressVersion, Version: process.version });
 });
+router.get('/email', function (req, res) {
+    res.render('email/ResetPassword', { url: "#" });
+});
 
 var apiRouter = express.Router();
 
 // without auth router
 apiRouter.post("/auth/login", AuthController.validate('login'), AuthController.login);
+apiRouter.post("/auth/forgotPassword", AuthController.validate('forgotPassword'), AuthController.forgotPassword);
+apiRouter.post("/auth/resetPassword", AuthController.validate('resetPassword'), AuthController.resetPassword);
 
 // import auth router in middleware
 const auth = require('./auth');

@@ -29,6 +29,40 @@ module.exports = {
                     body('password', "Password is required").notEmpty()
                 ]
             }
+            case 'forgotPassword': {
+                return [
+                    body('email', "Email is required").notEmpty(),
+                    body('email', "Invalid email format").isEmail().normalizeEmail(),
+                    body('email', "This mail not registered").custom(async (value) => {
+                        const user = await model.user.findOne({
+                            where: { email: value }
+                        })
+                        if (!user) {
+                            throw new Error()
+                        }
+                    })
+                ]
+            }
+            case 'resetPassword': {
+                return [
+                    body('token', "Token is required").notEmpty(),
+                    body('key', "Key is required").notEmpty(),
+                    body('password', "Password is required").notEmpty(),
+                    body('password', "Password must be Strong").isStrongPassword({
+                        minLength: 8,
+                        minLowercase: 1,
+                        minUppercase: 1,
+                        minNumbers: 1
+                    }),
+                    body('confirmPassword', "Confirm Password is required").notEmpty(),
+                    body('confirmPassword', "Passwords must be same").custom(async (value, { req }) => {
+                        const password = req.body.password
+                        if (password !== value) {
+                            throw new Error()
+                        }
+                    }),
+                ]
+            }
         }
     },
 
@@ -158,6 +192,122 @@ module.exports = {
             });
         } else {
             return response(res, false, [], "Unauthorised")
+        }
+    },
+
+    async forgotPassword(req, res, next) {
+
+        // check validate
+        const validateErrors = validationResult(req).formatWith(error => error.msg);
+
+        if (!validateErrors.isEmpty()) {
+
+            var validateErrorMsg = validateErrors.array().join(". ")
+            return response(res, false, [], validateErrorMsg)
+        } else {
+
+            const { email } = req.body;
+            console.log('email', email);
+
+            // get user_id
+            const user = await model.user.findOne({ where: { email } })
+            const user_id = user.user_id;
+            console.log('user_id', user_id);
+
+            // generate token and upadte
+            const token = crypto.randomBytes(16).toString('hex');
+            console.log('token', token);
+
+            // generate expiry date
+            const expiry_at = new Date();
+            expiry_at.setHours(expiry_at.getHours() + config.reset_pass_expires_in);
+
+            var key = encrypt(email);
+            key = key.encryptedData + ":" + key.iv
+
+            // create token in table
+            await model.user.update(
+                { forgot_pass_token: token, forgot_pass_expiry_at: expiry_at },
+                { where: { user_id } });
+
+            ejs.renderFile(path.join(__dirname, '../views/email/ResetPassword.ejs'), { url: `?token=${token}&key=${key}` }, (err, data) => {
+                if (err) {
+                    console.log('err', err);
+                    return response(res, false, [], err.message)
+                }
+
+                var mailMessage = {
+                    from: config.mail_from_address,
+                    to: email,
+                    subject: `Reset Password - ${config.app_name}`,
+                    html: data
+                }
+
+                // Send email
+                transporter.sendMail(mailMessage, (err, info) => {
+                    if (err) {
+                        console.log('err', err);
+                        return response(res, false, [], "Mail not sending")
+                    }
+
+                    console.log('Email sent: ' + info.response);
+                    return response(res, true, { token, key }, "Mail Sented. Check your mail")
+                });
+            });
+
+        }
+    },
+
+    async resetPassword(req, res, next) {
+
+        // check validate
+        const validateErrors = validationResult(req).formatWith(error => error.msg);
+
+        if (!validateErrors.isEmpty()) {
+
+            var validateErrorMsg = validateErrors.array().join(". ")
+            return response(res, false, [], validateErrorMsg)
+        } else {
+
+            const { key, token, password } = req.body;
+            console.log('token', token);
+
+            // decrypt email
+            const email = decrypt(key);
+            console.log('email', email);
+
+            req.body.email = email;
+
+            // check old password
+            passport.authenticate('login', async (err, user, info) => {
+                console.log('user', user);
+
+                if (err || info || !user) {
+
+                    // get user_id
+                    const user = await model.user.findOne({
+                        where: { email: email, forgot_pass_token: token }
+                    })
+                    if (user) {
+                        const user_id = user.user_id;
+                        console.log('user_id', user_id);
+
+                        if (user.forgot_pass_expiry_at < new Date()) {
+                            return response(res, false, [], "Token Expired")
+                        } else {
+                            // create token in table
+                            model.user.update(
+                                { password: password, forgot_pass_expiry_at: new Date() },
+                                { where: { user_id }, individualHooks: true });
+                            return response(res, false, [], "Password Changed")
+                        }
+                    } else {
+                        return response(res, false, [], "Invalid Token")
+                    }
+                } else {
+                    return response(res, false, [], "It's old password. Enter new password.")
+                }
+            })(req, res)
         }
     },
 }
