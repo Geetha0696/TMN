@@ -21,9 +21,9 @@ module.exports = {
         allowNull: false,
         type: Sequelize.TEXT
       },
-      expiry: {
+      expiry_at: {
         allowNull: false,
-        type: Sequelize.BOOLEAN
+        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,

@@ -3,7 +3,7 @@ module.exports = {
     server_port: 8080,
     console_log: true,
 
-    passport_expires_in: '1d',
+    passport_expires_in: 7, // days
     session_secret_key: 'HS256',
     reset_pass_expires_in: 2, // hours
     encryption_key: "11LuvVNFPr0XZK0kvHJ9aX6nxVvoH79T", // Must be 256 bits (32 characters)

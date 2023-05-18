@@ -96,11 +96,15 @@ module.exports = {
 
                         try {
                             // token generate
-                            const token = jwt.sign({ user: user }, config.session_secret_key, { expiresIn: config.passport_expires_in });
+                            const token = jwt.sign({ user: user }, config.session_secret_key, { expiresIn: config.passport_expires_in + 'd' });
                             console.log('token', token)
 
+                            // generate expiry date
+                            const expiry_at = new Date();
+                            expiry_at.setDate(expiry_at.getDate() + config.passport_expires_in || 1);
+
                             // create token in table
-                            model.login_log.create({ user_id: user.user_id, token: token })
+                            model.login_log.create({ user_id: user.user_id, token: token, expiry_at: expiry_at })
 
                             const responseData = {
                                 user_id: user.user_id,
@@ -133,16 +137,21 @@ module.exports = {
         if (token) {
 
             // check token is revoked
-            model.login_log.findOne({ where: { user_id: user_id, token: token, expiry: false } }).then(async (TokenData) => {
+            model.login_log.findOne({ where: { user_id: user_id, token: token } }).then(async (TokenData) => {
                 console.log('TokenData', TokenData)
 
                 if (TokenData) {
 
-                    // token revoke
-                    await model.login_log.update(
-                        { expiry: true, updatedAt: new Date() },
-                        { where: { user_id, token } });
-                    return response(res, true, [], "Logout success")
+                    if (TokenData.expiry_at < new Date()) {
+                        return response(res, false, [], "Token Expired")
+                    } else {
+
+                        // token revoke
+                        await model.login_log.update(
+                            { expiry_at: new Date(), updatedAt: new Date() },
+                            { where: { user_id, token } });
+                        return response(res, true, [], "Logout success")
+                    }
                 } else {
                     return response(res, false, [], "Token expired")
                 }
@@ -163,25 +172,29 @@ module.exports = {
                 const user_id = user && user.user ? user.user.user_id : null;
 
                 // check token is revoked
-                model.login_log.findOne({ where: { user_id: user_id, token: token, expiry: false } }).then((TokenData) => {
+                model.login_log.findOne({ where: { user_id: user_id, token: token } }).then((TokenData) => {
                     if (TokenData) {
 
-                        if (err) {
-
-                            // token revoked in table
-                            model.login_log.update(
-                                { expiry: true, updatedAt: new Date() },
-                                { where: { user_id, token } });
-
-                            if (err.name === 'TokenExpiredError') {
-                                return response(res, false, [], "Token expired")
-                            } else {
-                                return response(res, false, [], "Invalid Token")
-                            }
+                        if (TokenData.expiry_at < new Date()) {
+                            return response(res, false, [], "Token Expired")
                         } else {
+                            if (err) {
 
-                            req.user = user.user;
-                            next();
+                                // token revoked in table
+                                model.login_log.update(
+                                    { expiry_at: new Date(), updatedAt: new Date() },
+                                    { where: { user_id, token } });
+
+                                if (err.name === 'TokenExpiredError') {
+                                    return response(res, false, [], "Token expired")
+                                } else {
+                                    return response(res, false, [], "Invalid Token")
+                                }
+                            } else {
+
+                                req.user = user.user;
+                                next();
+                            }
                         }
                     } else {
                         return response(res, false, [], "Unauthorised")
@@ -305,7 +318,7 @@ module.exports = {
                         return response(res, false, [], "Invalid Token")
                     }
                 } else {
-                    return response(res, false, [], "It's old password. Enter new password.")
+                    return response(res, false, [], "Your new password can't be the same as current password.")
                 }
             })(req, res)
         }

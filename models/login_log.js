@@ -22,10 +22,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     user_id: DataTypes.INTEGER,
     token: DataTypes.TEXT,
-    expiry: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
+    expiry_at: DataTypes.BOOLEAN,
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: Date.now()
