@@ -24,12 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     timesheet_project_id: DataTypes.INTEGER,
     timesheet_title: DataTypes.STRING,
     timesheet_description: DataTypes.TEXT,
-    timesheet_date: DataTypes.DATE,
-    timesheet_estimation: DataTypes.INTEGER,
-    timesheet_billable: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false
-    },
+    timesheet_date: DataTypes.DATEONLY,
+    timesheet_estimation: DataTypes.STRING,
+    timesheet_billable_type: DataTypes.STRING,
     timesheet_status: {
       type: DataTypes.BOOLEAN,
       defaultValue: true

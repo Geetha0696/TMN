@@ -34,15 +34,15 @@ module.exports = {
       },
       timesheet_date: {
         allowNull: false,
-        type: Sequelize.DATE
+        type: Sequelize.DATEONLY
       },
       timesheet_estimation: {
         allowNull: false,
-        type: Sequelize.INTEGER
+        type: Sequelize.STRING
       },
-      timesheet_billable: {
+      timesheet_billable_type: {
         allowNull: false,
-        type: Sequelize.BOOLEAN
+        type: Sequelize.STRING
       },
       timesheet_status: {
         allowNull: false,
