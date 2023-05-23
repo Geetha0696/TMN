@@ -243,7 +243,7 @@ module.exports = {
                 { forgot_pass_token: token, forgot_pass_expiry_at: expiry_at },
                 { where: { user_id } });
 
-            ejs.renderFile(path.join(__dirname, '../views/email/ResetPassword.ejs'), { url: `?token=${token}&key=${key}` }, (err, data) => {
+            ejs.renderFile(path.join(__dirname, '../views/email/ResetPassword.ejs'), { url: `${config.frontend_url}/reset_password?token=${token}&key=${key}` }, (err, data) => {
                 if (err) {
                     console.log('err', err);
                     return response(res, false, [], err.message)
@@ -312,7 +312,7 @@ module.exports = {
                             model.user.update(
                                 { password: password, forgot_pass_expiry_at: new Date() },
                                 { where: { user_id }, individualHooks: true });
-                            return response(res, false, [], "Password Changed")
+                            return response(res, true, [], "Password Changed")
                         }
                     } else {
                         return response(res, false, [], "Invalid Token")

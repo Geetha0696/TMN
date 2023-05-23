@@ -2,6 +2,7 @@
 const {
   Model
 } = require('sequelize');
+
 module.exports = (sequelize, DataTypes) => {
   class timesheet extends Model {
     /**
@@ -41,5 +42,20 @@ module.exports = (sequelize, DataTypes) => {
     sequelize,
     modelName: 'timesheet',
   });
+
+  timesheet.associate = models => {
+    timesheet.belongsTo(models.user, {
+      foreignKey: 'timesheet_user_id'
+    });
+    timesheet.belongsTo(models.project, {
+      foreignKey: 'timesheet_project_id'
+    });
+  };
+
+  // timesheet.hasOne(model.user, {
+  //   foreignKey: 'timesheet_user_id'
+  // });
+  // model.user.belongsTo(timesheet);
+
   return timesheet;
 };

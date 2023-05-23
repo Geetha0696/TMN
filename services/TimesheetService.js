@@ -1,11 +1,59 @@
 const model = require("../models");
 
 module.exports = {
-    async list() {
+    async list(input) {
+        console.log('input', input)
         try {
             // get all datas
-            const response = await model.timesheet.findAll();
+            const response = await model.timesheet.findAll({
+                ...input,
+                include: [{
+                    model: model.user,
+                    attributes: [
+                        "user_id",
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "phone_no",
+                        "status"
+                    ]
+                }, {
+                    model: model.project,
+                    attributes: [
+                        "project_id",
+                        "project_name",
+                        "project_status"
+                    ]
+                }],
+                attributes: [
+                    "timesheet_id",
+                    "timesheet_user_id",
+                    "timesheet_project_id",
+                    "timesheet_title",
+                    "timesheet_description",
+                    "timesheet_date",
+                    "timesheet_estimation",
+                    "timesheet_billable_type",
+                    "timesheet_status"
+                ]
+            });
             console.log('response', JSON.stringify(response, null, 2))
+
+            return response;
+        } catch (error) {
+            return error.message
+        }
+    },
+
+    async count(input) {
+        console.log('input', input)
+        try {
+            // get all datas
+            const response = await model.timesheet.count({
+                ...input,
+                include: ["user", "project"],
+            });
+            console.log('count_response', response)
 
             return response;
         } catch (error) {
@@ -31,7 +79,36 @@ module.exports = {
         try {
             // find by id
             const response = await model.timesheet.findOne({
-                where: input
+                ...input,
+                include: [{
+                    model: model.user,
+                    attributes: [
+                        "user_id",
+                        "first_name",
+                        "last_name",
+                        "email",
+                        "phone_no",
+                        "status"
+                    ]
+                }, {
+                    model: model.project,
+                    attributes: [
+                        "project_id",
+                        "project_name",
+                        "project_status"
+                    ]
+                }],
+                attributes: [
+                    "timesheet_id",
+                    "timesheet_user_id",
+                    "timesheet_project_id",
+                    "timesheet_title",
+                    "timesheet_description",
+                    "timesheet_date",
+                    "timesheet_estimation",
+                    "timesheet_billable_type",
+                    "timesheet_status"
+                ]
             });
             console.log('response', response.toJSON())
 

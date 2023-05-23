@@ -6,7 +6,7 @@ const AuthController = require("../controllers/AuthController");
 const ProjectController = require("../controllers/ProjectController");
 
 const TimesheetRouter = express.Router();
-TimesheetRouter.post("/list", TimesheetController.getTimesheetList);
+TimesheetRouter.post("/list", TimesheetController.validate('listTimesheet'), TimesheetController.getTimesheetList);
 TimesheetRouter.post("/create", TimesheetController.validate('createTimesheet'), TimesheetController.createTimesheet);
 TimesheetRouter.post("/update", TimesheetController.validate('updateTimesheet'), TimesheetController.updateTimesheet);
 TimesheetRouter.post("/delete", TimesheetController.validate('deleteTimesheet'), TimesheetController.deleteTimesheet);
