@@ -106,14 +106,9 @@ module.exports = {
                             // create token in table
                             model.login_log.create({ user_id: user.user_id, token: token, expiry_at: expiry_at })
 
-                            const responseData = {
-                                user_id: user.user_id,
-                                name: user.name,
-                                email: user.email,
-                                token
-                            }
+                            user["token"] = token;
 
-                            return response(res, true, responseData, "Login success")
+                            return response(res, true, user, "Login success")
                         } catch (error) {
                             // error
                             return response(res, false, [], error.message)

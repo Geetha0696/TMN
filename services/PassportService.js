@@ -37,11 +37,25 @@ module.exports = () => {
             },
             async (email, password, done) => {
                 try {
-                    const user = await model.user.findOne({ where: { email: email } });
+                    var user = await model.user.findOne({
+                        where: { email: email },
+                        attributes: [
+                            "user_id",
+                            "first_name",
+                            "last_name",
+                            "password",
+                            "email",
+                            "phone_no",
+                            "status"
+                        ]
+                    });
                     if (!user) return done(null, false, { message: 'Email incorrect.' });
 
+                    console.log('user', user)
                     bcrypt.compare(password, user.password, (err, res) => {
                         if (res) {
+                            user = user.toJSON();
+                            delete user.password;
                             return done(null, user);
                         } else {
                             return done(null, false, { message: 'Password incorrect.' });

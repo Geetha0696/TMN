@@ -11,7 +11,7 @@ app.use(helmet())
 
 // cors
 var cors = require('cors')
-var allowlist = ['http://localhost']
+var allowlist = ['http://localhost', 'http://localhost:3000']
 var corsOptionsDelegate = function (req, callback) {
     var corsOptions;
     if (allowlist.indexOf(req.header('Origin')) !== -1) {
