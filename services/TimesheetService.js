@@ -68,7 +68,7 @@ module.exports = {
             // create data
             const response = await model.timesheet.create(input)
             console.log('response', response.toJSON())
-            return response.timesheet_id;
+            return response;
         } catch (error) {
             return error.message
         }

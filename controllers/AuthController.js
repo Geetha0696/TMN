@@ -171,7 +171,7 @@ module.exports = {
                     if (TokenData) {
 
                         if (TokenData.expiry_at < new Date()) {
-                            return response(res, false, [], "Token Expired")
+                            return response(res, false, { code: 401 }, "Token Expired")
                         } else {
                             if (err) {
 
@@ -181,9 +181,9 @@ module.exports = {
                                     { where: { user_id, token } });
 
                                 if (err.name === 'TokenExpiredError') {
-                                    return response(res, false, [], "Token expired")
+                                    return response(res, false, { code: 401 }, "Token expired")
                                 } else {
-                                    return response(res, false, [], "Invalid Token")
+                                    return response(res, false, { code: 401 }, "Invalid Token")
                                 }
                             } else {
 
@@ -192,14 +192,14 @@ module.exports = {
                             }
                         }
                     } else {
-                        return response(res, false, [], "Unauthorised")
+                        return response(res, false, { code: 401 }, "Unauthorised")
                     }
                 }).catch((error) => {
-                    return response(res, false, [], error.message)
+                    return response(res, false, { code: 401 }, error.message)
                 });
             });
         } else {
-            return response(res, false, [], "Unauthorised")
+            return response(res, false, { code: 401 }, "Unauthorised")
         }
     },
 

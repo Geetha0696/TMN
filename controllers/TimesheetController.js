@@ -18,8 +18,6 @@ module.exports = {
                             if (!data) {
                                 throw new Error()
                             }
-                        } else {
-                            throw new Error()
                         }
                     }).optional(),
                     body('project_id', "The selected Project id is invalid").custom(async (value) => {
@@ -30,8 +28,6 @@ module.exports = {
                             if (!data) {
                                 throw new Error()
                             }
-                        } else {
-                            throw new Error()
                         }
                     }).optional(),
                     body('billable', "The Billable field does not exist in billable, non billable").isIn(['billable', 'non billable', '', null]).optional(),
@@ -237,8 +233,8 @@ module.exports = {
                 const createResponse = await TimesheetService.create(inputs);
 
                 // check create record response
-                if (createResponse > 0)
-                    return response(res, true, createResponse, "Data Created")
+                if (createResponse.timesheet_id > 0)
+                    return response(res, true, createResponse, "TimeSheet Created")
                 else
                     return response(res, false, [], createResponse)
 
@@ -296,7 +292,7 @@ module.exports = {
                 })
 
                 if (!data) {
-                    return response(res, false, [], "Data Not found")
+                    return response(res, false, [], "TimeSheet Not found")
                 }
 
                 const { project_id, title, description, date, estimation, billable, status } = req.body;
@@ -318,9 +314,9 @@ module.exports = {
 
                 // check update record response
                 if (updatedResponse > 0)
-                    return response(res, true, [], "Data Updated")
+                    return response(res, true, [], "TimeSheet Updated")
                 else if (updatedResponse == 0)
-                    return response(res, false, [], "Data Not Updated")
+                    return response(res, false, [], "TimeSheet Not Updated")
                 else
                     return response(res, false, [], updatedResponse) // updated response throw the error
             }
@@ -349,9 +345,9 @@ module.exports = {
 
                 // check delete record response
                 if (deleteResponse > 0)
-                    return response(res, true, [], "Data Deleted")
+                    return response(res, true, [], "TimeSheet Deleted")
                 else if (deleteResponse == 0)
-                    return response(res, false, [], "Data Not Deleted")
+                    return response(res, false, [], "TimeSheet Not Deleted")
                 else
                     return response(res, false, [], deleteResponse) // updated response throw the error
             }
