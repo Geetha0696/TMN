@@ -106,14 +106,9 @@ module.exports = {
                             // create token in table
                             model.login_log.create({ user_id: user.user_id, token: token, expiry_at: expiry_at })
 
-                            const responseData = {
-                                user_id: user.user_id,
-                                name: user.name,
-                                email: user.email,
-                                token
-                            }
+                            user["token"] = token;
 
-                            return response(res, true, responseData, "Login success")
+                            return response(res, true, user, "Login success")
                         } catch (error) {
                             // error
                             return response(res, false, [], error.message)
@@ -176,7 +171,7 @@ module.exports = {
                     if (TokenData) {
 
                         if (TokenData.expiry_at < new Date()) {
-                            return response(res, false, [], "Token Expired")
+                            return response(res, false, { code: 401 }, "Token Expired")
                         } else {
                             if (err) {
 
@@ -186,9 +181,9 @@ module.exports = {
                                     { where: { user_id, token } });
 
                                 if (err.name === 'TokenExpiredError') {
-                                    return response(res, false, [], "Token expired")
+                                    return response(res, false, { code: 401 }, "Token expired")
                                 } else {
-                                    return response(res, false, [], "Invalid Token")
+                                    return response(res, false, { code: 401 }, "Invalid Token")
                                 }
                             } else {
 
@@ -197,14 +192,14 @@ module.exports = {
                             }
                         }
                     } else {
-                        return response(res, false, [], "Unauthorised")
+                        return response(res, false, { code: 401 }, "Unauthorised")
                     }
                 }).catch((error) => {
-                    return response(res, false, [], error.message)
+                    return response(res, false, { code: 401 }, error.message)
                 });
             });
         } else {
-            return response(res, false, [], "Unauthorised")
+            return response(res, false, { code: 401 }, "Unauthorised")
         }
     },
 
@@ -243,7 +238,7 @@ module.exports = {
                 { forgot_pass_token: token, forgot_pass_expiry_at: expiry_at },
                 { where: { user_id } });
 
-            ejs.renderFile(path.join(__dirname, '../views/email/ResetPassword.ejs'), { url: `?token=${token}&key=${key}` }, (err, data) => {
+            ejs.renderFile(path.join(__dirname, '../views/email/ResetPassword.ejs'), { url: `${config.frontend_url}/reset_password?token=${token}&key=${key}` }, (err, data) => {
                 if (err) {
                     console.log('err', err);
                     return response(res, false, [], err.message)
@@ -312,7 +307,7 @@ module.exports = {
                             model.user.update(
                                 { password: password, forgot_pass_expiry_at: new Date() },
                                 { where: { user_id }, individualHooks: true });
-                            return response(res, false, [], "Password Changed")
+                            return response(res, true, [], "Password Changed")
                         }
                     } else {
                         return response(res, false, [], "Invalid Token")
